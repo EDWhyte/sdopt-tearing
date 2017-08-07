@@ -10,7 +10,7 @@ from six import exec_
 import logging
 
 
-def main(eqs, var):
+def main(eqs, var, variable_bounds):
 
     n_eqs, n_vars = len(eqs), len(var)
     logging.debug('The system of equations:')
@@ -25,23 +25,23 @@ def main(eqs, var):
         logging.debug('Variables: {}\n'.format(variables))
 
         var_names = [str(v) for v in variables]
-        var_bounds = [(v, VAR_BOUNDS[str(v)]) for v in var_names]
+        var_bounds = [(v, variable_bounds[str(v)]) for v in var_names]
         solutions = symbolic_sols(eq, variables, var_bounds)
         row = [' '] * n_vars
         for v in var_names:
             row[var[v]] = 'S' if v in solutions else 'U'
         solvability_pattern.append(row)
-    pretty_print_solvability_pattern(solvability_pattern, n_vars)
+    pretty_print_solvability_pattern(solvability_pattern, n_vars, variable_bounds, eqs)
     logging.debug('\nDone!')
 
 
-def pretty_print_solvability_pattern(solvability_pattern, n_vars):
-    var_names = list(VAR_BOUNDS)
+def pretty_print_solvability_pattern(solvability_pattern, n_vars, variable_bounds, eqs):
+    var_names = list(variable_bounds)
     logging.debug('============================================================')
     logging.debug('The equations were (left-hand side = 0, only left-hand side shown):')
-    logging.debug(EQUATIONS)
+    logging.debug(eqs)
     logging.debug('Variable bounds:\n')
-    for name, (lb, ub) in VAR_BOUNDS.items():
+    for name, (lb, ub) in variable_bounds.items():
         logging.debug('{} <= {} <= {}'.format(lb, name, ub))
 
     logging.debug('\nSolvability pattern')
@@ -143,4 +143,4 @@ if __name__ == '__main__':
 
     EQS = [sp.sympify(line) for line in EQUATIONS.splitlines() if line.strip()]
 
-    main(EQS, VAR_ORDER)
+    main(EQS, VAR_ORDER, VAR_BOUNDS)

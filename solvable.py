@@ -9,19 +9,10 @@ import imp
 from six import exec_
 import logging
 
-EQUATIONS = '''
-    x  + y    + z - 2
-         y**2 + z - 3
-log(x) +      + z - 1.0
-'''
 
-VAR_BOUNDS = OrderedDict([('x', (-10.0, 10.0)), ('y', (-4, 4)), ('z', (-6, 6))])
+def main(eqs, var):
 
-VAR_ORDER = {name: i for i, name in enumerate(VAR_BOUNDS)}
-
-def main():
-    eqs = [sp.sympify(line) for line in EQUATIONS.splitlines() if line.strip()]
-    n_eqs, n_vars = len(eqs), len(VAR_ORDER)
+    n_eqs, n_vars = len(eqs), len(var)
     logging.debug('The system of equations:')
     logging.debug('\n'.join(str(eq) for eq in eqs))
     logging.debug('Size: %d x %d' % (n_eqs, n_vars))
@@ -30,7 +21,7 @@ def main():
         logging.debug('------------------------------------------------------------')
         logging.debug('Trying to solve: %s = 0 for each variable\n' % str(eq))
         variables = [v for v in eq.atoms(sp.Symbol) if not v.is_number]
-        variables = sorted(variables, key=lambda v: VAR_ORDER[str(v)])
+        variables = sorted(variables, key=lambda v: var[str(v)])
         logging.debug('Variables: {}\n'.format(variables))
 
         var_names = [str(v) for v in variables]
@@ -38,10 +29,11 @@ def main():
         solutions = symbolic_sols(eq, variables, var_bounds)
         row = [' '] * n_vars
         for v in var_names:
-            row[VAR_ORDER[v]] = 'S' if v in solutions else 'U'
+            row[var[v]] = 'S' if v in solutions else 'U'
         solvability_pattern.append(row)
     pretty_print_solvability_pattern(solvability_pattern, n_vars)
     logging.debug('\nDone!')
+
 
 def pretty_print_solvability_pattern(solvability_pattern, n_vars):
     var_names = list(VAR_BOUNDS)
@@ -62,16 +54,18 @@ def pretty_print_solvability_pattern(solvability_pattern, n_vars):
     for i, row in enumerate(solvability_pattern):
         logging.debug('{}{}{}'.format(i, ' |','  '.join(entry for entry in row)))
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+
 
 def symbolic_sols(eq, variables, varname_bnds):
-    #print(eq)
+    # print(eq)
     solutions = { } 
     for v in variables:
         sol = get_solution(eq, v, varname_bnds)
         if sol:
             solutions[str(v)] = sol
     return solutions
+
 
 def get_solution(eq, v, varname_bnds):
     try:
@@ -105,6 +99,7 @@ def is_safe():
     return res in iv.mpf([-10**15, 10**15])
 '''
 
+
 def check_safety(expression, varname_bnds):
     names, ivbounds = [ ], [ ]
     bound_template = 'iv.mpf(({l}, {u}))'
@@ -119,9 +114,10 @@ def check_safety(expression, varname_bnds):
     code = eval_code.format(varnames   = ', '.join(names),
                             varbounds  = ', '.join(ivbounds),
                             expression = expression)
-    #print(code)
+    # print(code)
     m = import_code(code)
     return m.is_safe()
+
 
 def import_code(code):
     module = imp.new_module('someFakeName')
@@ -134,4 +130,17 @@ def import_code(code):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    main()
+
+    EQUATIONS = '''
+        x  + y    + z - 2
+             y**2 + z - 3
+    log(x) +      + z - 1.0
+    '''
+
+    VAR_BOUNDS = OrderedDict([('x', (-10.0, 10.0)), ('y', (-4, 4)), ('z', (-6, 6))])
+
+    VAR_ORDER = {name: i for i, name in enumerate(VAR_BOUNDS)}
+
+    EQS = [sp.sympify(line) for line in EQUATIONS.splitlines() if line.strip()]
+
+    main(EQS, VAR_ORDER)

@@ -6,7 +6,8 @@ from __future__ import division, print_function
 from collections import OrderedDict
 import sympy as sp
 import imp
-from six import exec_ 
+from six import exec_
+import logging
 
 EQUATIONS = '''
     x  + y    + z - 2
@@ -21,17 +22,17 @@ VAR_ORDER = {name: i for i, name in enumerate(VAR_BOUNDS)}
 def main():
     eqs = [sp.sympify(line) for line in EQUATIONS.splitlines() if line.strip()]
     n_eqs, n_vars = len(eqs), len(VAR_ORDER)
-    print('The system of equations:')
-    print('\n'.join(str(eq) for eq in eqs))
-    print('Size: %d x %d' % (n_eqs, n_vars))
+    logging.debug('The system of equations:')
+    logging.debug('\n'.join(str(eq) for eq in eqs))
+    logging.debug('Size: %d x %d' % (n_eqs, n_vars))
     solvability_pattern = []
     for eq in eqs:
-        print('------------------------------------------------------------')
-        print('Trying to solve: %s = 0 for each variable\n' % str(eq))
+        logging.debug('------------------------------------------------------------')
+        logging.debug('Trying to solve: %s = 0 for each variable\n' % str(eq))
         variables = [v for v in eq.atoms(sp.Symbol) if not v.is_number]
         variables = sorted(variables, key=lambda v: VAR_ORDER[str(v)])
-        print('Variables:', variables)
-        print()
+        logging.debug('Variables: {}\n'.format(variables))
+
         var_names = [str(v) for v in variables]
         var_bounds = [(v, VAR_BOUNDS[str(v)]) for v in var_names]
         solutions = symbolic_sols(eq, variables, var_bounds)
@@ -40,27 +41,26 @@ def main():
             row[VAR_ORDER[v]] = 'S' if v in solutions else 'U'
         solvability_pattern.append(row)
     pretty_print_solvability_pattern(solvability_pattern, n_vars)
-    print('Done!')
+    logging.debug('\nDone!')
 
 def pretty_print_solvability_pattern(solvability_pattern, n_vars):
     var_names = list(VAR_BOUNDS)
-    print('============================================================')
-    print('The equations were (left-hand side = 0, only left-hand side shown):')
-    print(EQUATIONS)
-    print('Variable bounds:\n')
+    logging.debug('============================================================')
+    logging.debug('The equations were (left-hand side = 0, only left-hand side shown):')
+    logging.debug(EQUATIONS)
+    logging.debug('Variable bounds:\n')
     for name, (lb, ub) in VAR_BOUNDS.items():
-        print('{} <= {} <= {}'.format(lb, name, ub))
-    print()
-    print('Solvability pattern')
-    print('S: solvable')
-    print('U: unsolvable/unsafe elimination given the variable bounds')
-    print()
-    indent = '  '
-    print(indent, '  '.join(var_names))
-    print(indent, '-'*(n_vars + 2*(n_vars-1)))
+        logging.debug('{} <= {} <= {}'.format(lb, name, ub))
+
+    logging.debug('\nSolvability pattern')
+    logging.debug('S: solvable')
+    logging.debug('U: unsolvable/unsafe elimination given the variable boundsn\n')
+
+    indent = '   '
+    logging.debug('{}{}'.format(indent, '  '.join(var_names)))
+    logging.debug('{}{}'.format(indent, '-'*(n_vars + 2*(n_vars-1))))
     for i, row in enumerate(solvability_pattern):
-        print(i, ' |','  '.join(entry for entry in row), sep='')
-    print()
+        logging.debug('{}{}{}'.format(i, ' |','  '.join(entry for entry in row)))
 
 #-------------------------------------------------------------------------------
 
@@ -77,16 +77,15 @@ def get_solution(eq, v, varname_bnds):
     try:
         sol = sp.solve(eq, v, rational=False)
     except NotImplementedError as nie:
-        print('<<<\n', nie, '\n>>>', sep='')
+        logging.error('{}{}{}'.format('<<<\n', nie, '\n>>>'))
         return
     if len(sol) != 1: # Either no solution or multiple solutions
         return
     # Unique and explicit solution
     expression = str(sol[0])
-    print(v, '=', expression)
+    logging.debug('{}{}{}'.format(v, '=', expression))
     safe = check_safety(expression, varname_bnds)
-    print('Is safe?', safe)
-    print()
+    logging.debug('{}{}\n'.format('Is safe?', safe))
     return str(v) + ' = ' + expression if safe else None
 
 eval_code = '''
@@ -134,4 +133,5 @@ def import_code(code):
     return module
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     main()

@@ -31,8 +31,8 @@ def main(eqs, var, variable_bounds):
         for v in var_names:
             row[var[v]] = 'S' if v in solutions else 'U'
         solvability_pattern.append(row)
-    pretty_print_solvability_pattern(solvability_pattern, n_vars, variable_bounds, eqs)
-    logging.debug('\nDone!')
+
+    return solvability_pattern, n_vars
 
 
 def pretty_print_solvability_pattern(solvability_pattern, n_vars, variable_bounds, eqs):
@@ -143,4 +143,7 @@ if __name__ == '__main__':
 
     EQS = [sp.sympify(line) for line in EQUATIONS.splitlines() if line.strip()]
 
-    main(EQS, VAR_ORDER, VAR_BOUNDS)
+    solvability_pattern, n_vars = main(EQS, VAR_ORDER, VAR_BOUNDS)
+
+    pretty_print_solvability_pattern(solvability_pattern, n_vars, VAR_BOUNDS, EQS)
+    logging.debug('\nDone!')

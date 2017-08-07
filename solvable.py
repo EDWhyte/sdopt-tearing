@@ -52,14 +52,14 @@ def pretty_print_solvability_pattern(solvability_pattern, n_vars, variable_bound
     logging.debug('{}{}'.format(indent, '  '.join(var_names)))
     logging.debug('{}{}'.format(indent, '-'*(n_vars + 2*(n_vars-1))))
     for i, row in enumerate(solvability_pattern):
-        logging.debug('{}{}{}'.format(i, ' |','  '.join(entry for entry in row)))
+        logging.debug('{}{}{}'.format(i, ' |', '  '.join(entry for entry in row)))
 
 # -------------------------------------------------------------------------------
 
 
 def symbolic_sols(eq, variables, varname_bnds):
     # print(eq)
-    solutions = { } 
+    solutions = {}
     for v in variables:
         sol = get_solution(eq, v, varname_bnds)
         if sol:
@@ -73,7 +73,7 @@ def get_solution(eq, v, varname_bnds):
     except NotImplementedError as nie:
         logging.error('{}{}{}'.format('<<<\n', nie, '\n>>>'))
         return
-    if len(sol) != 1: # Either no solution or multiple solutions
+    if len(sol) != 1:  # Either no solution or multiple solutions
         return
     # Unique and explicit solution
     expression = str(sol[0])
@@ -101,7 +101,7 @@ def is_safe():
 
 
 def check_safety(expression, varname_bnds):
-    names, ivbounds = [ ], [ ]
+    names, ivbounds = [], []
     bound_template = 'iv.mpf(({l}, {u}))'
     NegInf, PosInf = float('-inf'), float('inf')
     for name, bounds in varname_bnds:
@@ -111,9 +111,9 @@ def check_safety(expression, varname_bnds):
         ivbounds.append(bound_template.format(l=lb, u=ub))
     expression = expression.replace('exp', 'iv.exp')
     expression = expression.replace('log', 'iv.log')    
-    code = eval_code.format(varnames   = ', '.join(names),
-                            varbounds  = ', '.join(ivbounds),
-                            expression = expression)
+    code = eval_code.format(varnames=', '.join(names),
+                            varbounds=', '.join(ivbounds),
+                            expression=expression)
     # print(code)
     m = import_code(code)
     return m.is_safe()
@@ -143,7 +143,7 @@ if __name__ == '__main__':
 
     EQS = [sp.sympify(line) for line in EQUATIONS.splitlines() if line.strip()]
 
-    solvability_pattern, n_vars = main(EQS, VAR_ORDER, VAR_BOUNDS)
+    solvability_pattern_list, number_of_vars = main(EQS, VAR_ORDER, VAR_BOUNDS)
 
-    pretty_print_solvability_pattern(solvability_pattern, n_vars, VAR_BOUNDS, EQS)
+    pretty_print_solvability_pattern(solvability_pattern_list, number_of_vars, VAR_BOUNDS, EQS)
     logging.debug('\nDone!')

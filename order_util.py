@@ -100,7 +100,7 @@ def coo_matrix_to_bipartite(rows, cols, values, shape):
 def check_coordinate_format(rows, cols, values, shape):
     n_rows, n_cols = shape
     assert n_rows >= 1 and n_cols >= 1, 'At least one row and one column are expected'
-    assert rows and cols and values, 'There should be at least one entry'
+    assert list(rows) and list(cols) and list(values), 'There should be at least one entry'
     assert len(rows) == len(cols) and len(rows) == len(values), 'Array length mismatch'    
     check_if_indices_are_in_range(rows, shape[0], 'row')
     check_if_indices_are_in_range(cols, shape[1], 'column')    

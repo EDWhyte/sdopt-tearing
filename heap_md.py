@@ -19,9 +19,11 @@ from order_util import colp_to_spiked_form, get_hessenberg_order, check_spiked_f
                        get_inverse_perm, get_row_weights
 
 
-def hessenberg(rows, cols, values, n_rows, n_cols, tie_breaking):
+def hessenberg(rows, cols, values, n_rows, n_cols, tie_breaking, to_form='LOWER'):
     'Tie breaking options: MIN_FIRST, MAX_FIRST, IGNORE'
+    'to_form options: LOWER, SPIKED (set the default form the lower hessenberg form'
     assert tie_breaking in ('IGNORE', 'MIN_FIRST', 'MAX_FIRST'), tie_breaking
+    assert to_form in ('LOWER', 'SPIKED'), 'to_form may only be "LOWER" or "SPIKED" not "{}"'.format(to_form)
     # The col IDs in cols are shifted by n_rows, must undo later
     g, eqs, _ = coo_matrix_to_bipartite(rows, cols, values, (n_rows, n_cols))
     if tie_breaking != 'IGNORE':
@@ -34,7 +36,11 @@ def hessenberg(rows, cols, values, n_rows, n_cols, tie_breaking):
         eqs = set(mapping[eq] for eq in eqs)
         g = partial_relabel(g, mapping)
     #
-    rperm, cperm, _, _, _, _ = to_hessenberg_form(g, eqs)
+    if to_form == 'LOWER':
+        rperm, cperm, _, _, _, _ = to_hessenberg_form(g, eqs)
+    else:
+        _, rperm, cperm, _, _ = to_spiked_form(g, eqs)
+
     # Finally, shift the colp such that it is a permutation of 0 .. n_cols-1
     cperm = [c-n_rows for c in cperm]
     #
@@ -67,9 +73,9 @@ def to_spiked_form(g, eqs, forbidden=None):
     rowp, colp_hess, matches, tear_set, sink_set = min_degree(g, eqs, forbidden)
     colp = colp_to_spiked_form(rowp, colp_hess, matches, tear_set, sink_set)
     check_spiked_form(g, rowp, colp, tear_set)
-    #from plot_ordering import plot_hessenberg, plot_bipartite
-    #plot_hessenberg(g, rowp, colp_hess, [], '')
-    #plot_bipartite(g, forbidden, rowp, colp)
+    # from plot_ordering import plot_hessenberg, plot_bipartite
+    # plot_hessenberg(g, rowp, colp_hess, [], '')
+    # plot_bipartite(g, forbidden, rowp, colp)
     tears = [c for c in colp if c in tear_set]
     sinks = [r for r in rowp if r in sink_set]
     return (False, rowp, colp, tears, sinks)
@@ -88,8 +94,8 @@ def to_hessenberg_form(g, eqs, forbidden=None):
 
 
 def min_degree(g_orig, eqs, forbidden=None):
-    '''Returns: tuple([row permutation], [column permutation], 
-    {eq: var and var: eq matches}, set(tear vars), set(residual equations)).'''
+    '''Returns: tuple( [row permutation], [column permutation], 
+    {eq:var and var:eq matches}, set(tear vars), set(residual equations) ).'''
     # Duplicated in bb_tear.initial_solution with none forbidden
     assert eqs
     if forbidden is None:

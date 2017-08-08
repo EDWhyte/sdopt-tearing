@@ -5,14 +5,14 @@
 from __future__ import print_function, division
 from itertools import chain
 from heap_md import min_degree
-from order_util import coo_matrix_to_bipartite, get_inverse_perm
+from order_util import coo_matrix_to_bipartite, get_inverse_perm, find_forbidden_eliminations
 
 
 def to_bordered_form(rows, cols, values, shape):
     # values must be integers
     # cols are shifted by n_rows, must undo later
     g, eqs, cols = coo_matrix_to_bipartite(rows, cols, values, shape)
-    forbidden = {(i, j) for i, j, v in zip(rows, cols, values) if v <= 0}
+    forbidden = find_forbidden_eliminations(rows, cols, values)
     assert all(g.has_edge(*e) for e in forbidden)
     rowp, colp, size = to_bordered(g, eqs, forbidden)
     # undo the col shift

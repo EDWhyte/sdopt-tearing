@@ -413,3 +413,8 @@ def deterministic_topological_sort(dag, nbunch=None):
                 order.append(w)
                 fringe.pop()    # done considering this node
     return list(reversed(order))
+
+
+def find_forbidden_eliminations(rows, cols, values):
+
+    return {(i, j) for i, j, v in zip(rows, cols, values) if v <= 0}

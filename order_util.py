@@ -83,7 +83,6 @@ def bipartite_from_empty_matrix(shape):
     assert len(g) == n_rows + n_cols
     return g, set(r_nodes), cols
 
-
 def coo_matrix_to_bipartite(rows, cols, values, shape):
     check_coordinate_format(rows, cols, values, shape)
     # See _check_coordinate_format in rpc_api too
@@ -97,7 +96,6 @@ def coo_matrix_to_bipartite(rows, cols, values, shape):
     assert len(g) == n_rows + n_cols
     g.add_edges_from(izip(rows, cols, ({'weight': int(v)} for v in values)))
     return g, set(r_nodes), cols
-
 
 def check_coordinate_format(rows, cols, values, shape):
     n_rows, n_cols = shape

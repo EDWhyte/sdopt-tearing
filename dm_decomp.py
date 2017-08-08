@@ -145,7 +145,7 @@ def dm_coordinate(rows, cols, values, shape, upper, minimize=False, show=False, 
     # rdiag, cdiag: the diagonal entries in the SCCs, marked red on the plot
     # colors: color groups, 1: black, 2: red, 3: gray
     #---------------------------------------------------------------------------
-    if values: # non-empty submatrix
+    if len(values) != 0: # non-empty submatrix
         # Re-weight to get a minimum or maximum weight diagonal
         values = re_weight(values, minimize)
         assert all(v==int(v) and v >= 1 for v in values)
@@ -639,21 +639,21 @@ COORDINATE_TEST_CASES = {
                                           7  8
                                           7  8
                                           7  8'''),
-    
+
     'test_7' : ('''0  0
                     1  1  1
                        2  2  2
                           3  3  3
                              4  4  4
                                 5  5''',
-                    
+
                  '''0  1
                     0  1  2
                        1  2  3
                           2  3  4
                              3  4  5
                                 4  5''',
-                    
+
                  '''10   1
                      1  10   1
                          1  10   1
@@ -668,7 +668,7 @@ COORDINATE_TEST_CASES = {
                              4  4  4
                                 5  5  5
                                    6  6''',
-                    
+
                  '''0  1
                     0  1  2
                        1  2  3
@@ -676,7 +676,7 @@ COORDINATE_TEST_CASES = {
                              3  4  5
                                 4  5  6
                                    5  6''',
-                    
+
                  '''10   1
                      1  10   1
                          1  10   1
@@ -838,7 +838,7 @@ COORDINATE_TEST_CASES = {
                                                                                                                               28  28  28  28  28
                                                                                                                                   29  29  29  29
                                                                                                                                       30  30  30''',
-                    
+
                     '''0   1   2                                                                                                                
                        0   1   2   3                                                                                                            
                        0   1   2   3   4                                                                                                        
@@ -870,8 +870,8 @@ COORDINATE_TEST_CASES = {
                                                                                                                               26  27  28  29  30
                                                                                                                                   27  28  29  30
                                                                                                                                       28  29  30''',
-                    
-                    
+
+
                     '''10   1   1                                                                                                                
                        1  10   1   1                                                                                                            
                        1   1  10   1   1                                                                                                        
@@ -903,7 +903,7 @@ COORDINATE_TEST_CASES = {
                                                                                                                                1   1  10   1   1
                                                                                                                                    1   1  10   1
                                                                                                                                        1   1  10'''),
-                    
+
        'test_12': ('''0                          0
                          1                       1
                             2                    2
@@ -914,7 +914,7 @@ COORDINATE_TEST_CASES = {
                                            7     7
                                               8  8
                       9  9  9  9  9  9  9  9  9  9''',
-                    
+
                    '''0                          9
                          1                       9
                             2                    9
@@ -925,7 +925,7 @@ COORDINATE_TEST_CASES = {
                                            7     9
                                               8  9
                       0  1  2  3  4  5  6  7  8  9''',
-                    
+
                    '''1                          1
                          1                       1
                             1                    1
@@ -947,7 +947,7 @@ COORDINATE_TEST_CASES = {
                                            7     7
                                               8  8
                       9  9  9  9  9  9  9  9  9  9''',
-                    
+
                    '''0                          9
                          1                       9
                             2                    9
@@ -958,7 +958,7 @@ COORDINATE_TEST_CASES = {
                                            7     9
                                               8  9
                       0  1  2  3  4  5  6  7  8  9''',
-                    
+
                    '''1                          1
                          1                       1
                             1                    1
